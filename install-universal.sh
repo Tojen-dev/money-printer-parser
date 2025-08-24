@@ -30,9 +30,23 @@ if [ -z "$PYTHON_VERSION" ]; then
     PYTHON_VERSION="python3"
 fi
 
+# Устанавливаем venv пакет для конкретной версии Python
+echo "🔧 Установка venv для $PYTHON_VERSION..."
+if [[ "$PYTHON_VERSION" == "python3.11" ]]; then
+    sudo apt install -y python3.11-venv
+elif [[ "$PYTHON_VERSION" == "python3.10" ]]; then
+    sudo apt install -y python3.10-venv
+elif [[ "$PYTHON_VERSION" == "python3.9" ]]; then
+    sudo apt install -y python3.9-venv
+elif [[ "$PYTHON_VERSION" == "python3.8" ]]; then
+    sudo apt install -y python3.8-venv
+else
+    sudo apt install -y python3-venv
+fi
+
 # Устанавливаем системные зависимости
 echo "🔧 Установка системных зависимостей..."
-sudo apt install -y git curl wget build-essential libssl-dev libffi-dev python3-dev
+sudo apt install -y git curl wget build-essential libssl-dev libffi-dev python3-dev python3-venv python3-pip
 
 # Проверяем существование проекта
 echo "📁 Проверка директории проекта..."
