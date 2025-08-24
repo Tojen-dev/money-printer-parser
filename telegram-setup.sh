@@ -18,14 +18,15 @@ echo "📱 Запуск настройки Telegram..."
 echo "Введите код подтверждения, который придет в Telegram:"
 python -c "
 import asyncio
-from telegram_monitor import TelegramMonitor
+from telethon import TelegramClient
 from config import TELEGRAM_API_ID, TELEGRAM_API_HASH, TELEGRAM_PHONE, TELEGRAM_SESSION_NAME
 
 async def setup_telegram():
-    monitor = TelegramMonitor()
     try:
-        await monitor._setup_client()
+        client = TelegramClient(TELEGRAM_SESSION_NAME, TELEGRAM_API_ID, TELEGRAM_API_HASH)
+        await client.start(phone=TELEGRAM_PHONE)
         print('✅ Telegram сессия успешно настроена!')
+        await client.disconnect()
     except Exception as e:
         print(f'❌ Ошибка настройки: {e}')
 
