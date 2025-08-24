@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  bwe-news-speed-test:
+    build: .
+    container_name: bwe-news-speed-test
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=UTC
+    networks:
+      - bwe-network
+
+networks:
+  bwe-network:
+    driver: bridge
+
+volumes:
+  logs:
+  config:
