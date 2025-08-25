@@ -11,8 +11,9 @@ from telethon import TelegramClient
 from config import TELEGRAM_API_ID, TELEGRAM_API_HASH, TELEGRAM_PHONE, TELEGRAM_SESSION_NAME
 
 class TelegramLogger:
-    def __init__(self, chat_id=None):
+    def __init__(self, chat_id=None, target_user="@Tojen"):
         self.chat_id = chat_id or "me"  # Отправляем себе, если chat_id не указан
+        self.target_user = target_user  # Пользователь для отправки файлов
         self.client = None
         self.last_position = 0
         
@@ -48,8 +49,20 @@ class TelegramLogger:
             return False
             
         try:
+            # Отправляем себе
             await self.client.send_file(self.chat_id, file_path, caption=caption)
-            return True
+            print(f"✅ Файл отправлен себе: {file_path}")
+            
+            # Отправляем пользователю @Tojen
+            try:
+                user = await self.client.get_entity(self.target_user)
+                await self.client.send_file(user, file_path, caption=caption)
+                print(f"✅ Файл отправлен пользователю {self.target_user}: {file_path}")
+                return True
+            except Exception as e:
+                print(f"❌ Ошибка отправки пользователю {self.target_user}: {e}")
+                return False
+                
         except Exception as e:
             print(f"❌ Ошибка отправки файла: {e}")
             return False
@@ -114,20 +127,27 @@ async def main():
     parser = argparse.ArgumentParser(description='Telegram Logger для BWEnews')
     parser.add_argument('--log-file', default='bwe_news_log.txt', help='Путь к лог файлу')
     parser.add_argument('--chat-id', help='ID чата для отправки (по умолчанию себе)')
+    parser.add_argument('--target-user', default='@Tojen', help='Пользователь для отправки файлов')
     parser.add_argument('--interval', type=int, default=30, help='Интервал мониторинга в секундах')
     parser.add_argument('--lines', type=int, default=50, help='Количество строк для отправки')
-    parser.add_argument('--mode', choices=['monitor', 'send'], default='monitor', 
-                       help='Режим: monitor - мониторинг, send - отправить текущие логи')
+    parser.add_argument('--mode', choices=['monitor', 'send', 'file'], default='monitor', 
+                       help='Режим: monitor - мониторинг, send - отправить текущие логи, file - отправить файл')
     
     args = parser.parse_args()
     
-    logger = TelegramLogger(args.chat_id)
+    logger = TelegramLogger(args.chat_id, args.target_user)
     
     if args.mode == 'monitor':
         await logger.monitor_logs(args.log_file, args.interval)
-    else:
+    elif args.mode == 'send':
         await logger.send_current_logs(args.log_file, args.lines)
         await logger.client.disconnect()
+    elif args.mode == 'file':
+        if await logger.setup_client():
+            await logger.send_file(args.log_file, "📋 Лог файл BWEnews Speed Test")
+            await logger.client.disconnect()
+        else:
+            print("❌ Не удалось подключиться к Telegram")
 
 if __name__ == "__main__":
     asyncio.run(main())

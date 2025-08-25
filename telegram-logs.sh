@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Скрипт для отправки логов в Telegram
-# Использование: ./telegram-logs.sh [start|stop|status|send|monitor]
+# Использование: ./telegram-logs.sh [start|stop|status|send|file|monitor]
 
 LOG_FILE="bwe_news_log.txt"
 PID_FILE="/tmp/telegram-logger.pid"
@@ -65,6 +65,14 @@ case "$1" in
         python telegram-logger.py --mode send --lines 50
         ;;
         
+    file)
+        echo "📁 Отправка файла логов в Telegram..."
+        cd ~/money-printer-parser
+        source venv/bin/activate
+        
+        python telegram-logger.py --mode file
+        ;;
+        
     monitor)
         echo "📊 Запуск мониторинга в интерактивном режиме..."
         cd ~/money-printer-parser
@@ -74,18 +82,20 @@ case "$1" in
         ;;
         
     *)
-        echo "Использование: $0 {start|stop|status|send|monitor}"
+        echo "Использование: $0 {start|stop|status|send|file|monitor}"
         echo ""
         echo "Команды:"
         echo "  start   - Запустить логгер в фоне"
         echo "  stop    - Остановить логгер"
         echo "  status  - Показать статус"
         echo "  send    - Отправить текущие логи"
+        echo "  file    - Отправить весь файл логов"
         echo "  monitor - Запустить мониторинг в интерактивном режиме"
         echo ""
         echo "Примеры:"
         echo "  $0 start    # Запуск в фоне"
         echo "  $0 send     # Отправить последние 50 строк"
+        echo "  $0 file     # Отправить весь файл логов"
         echo "  $0 monitor  # Интерактивный мониторинг"
         exit 1
         ;;
